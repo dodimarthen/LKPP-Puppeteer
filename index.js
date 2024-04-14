@@ -1,5 +1,5 @@
 const puppeteer = require('puppeteer');
-const { websiteURL, username, password } = require('./config.js');
+const { websiteURL, username, password, paketbaruPage } = require('./config.js');
 
 const getQuotes = async () => {
   // Record the start time
@@ -31,6 +31,10 @@ const getQuotes = async () => {
   });
   console.log(headerText);
   
+  //Go to the "paket baru" page
+  await page.goto(paketbaruPage, {
+    waitUntil: "domcontentloaded",
+  });
   
   
   // Close the browser
