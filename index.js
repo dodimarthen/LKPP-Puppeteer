@@ -46,30 +46,6 @@ const getQuotes = async () => {
     
       console.log(hrefs);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   } catch (error) {
     console.error('An error occurred:', error);
   } finally {
