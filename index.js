@@ -1,5 +1,11 @@
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-extra');
 const { websiteURL, username, password, paketbaruPage } = require('./config.js');
+const scrapeInformasiUtama = require('./ScrapInformasiUtama');
+const scrapePpPpk = require('./ScrapPPK.js');
+
+// Add stealth plugin and use defaults
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+puppeteer.use(StealthPlugin());
 
 const getQuotes = async () => {
   // Record the start time
@@ -19,7 +25,7 @@ const getQuotes = async () => {
       waitUntil: "domcontentloaded",
     });
 
-    //Login
+    // Login
     await page.waitForSelector('.input-login[name="username"]');
     await page.type('.input-login[name="username"]', username);
     await page.waitForSelector('.input-login[name="password"]');
@@ -30,27 +36,19 @@ const getQuotes = async () => {
     const headerText = await page.evaluate(() => {
       return document.querySelector('.modal-header h4').textContent;
     });
-    
-    //Go to the "paket baru" page
-    await page.goto(paketbaruPage, {
+
+    await page.goto("https://e-katalog.lkpp.go.id/v2/id/purchasing/paket/detail/8929530", {
       waitUntil: "domcontentloaded",
     });
 
-    // Wait for the table to load
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    await page.waitForSelector('table#tblPenawaran tbody');
-    const hrefs = await page.evaluate(() => {
-        const links = Array.from(document.querySelectorAll('table#tblPenawaran a[target="_blank"]'));
-        return links.map(link => link.getAttribute('href'));
-      });
-    
-      console.log(hrefs); 
+    await new Promise(resolve => setTimeout(resolve, 5000));
+    const informasiUtamaData = await scrapeInformasiUtama(page);
+    console.log("Informasi Utama Data:", informasiUtamaData);
+    // const ppkData = await scrapePpPpk(page);
+    // console.log("PpPppk: ", ppkData);
+  
 
-      for (const href of hrefs) {
-        await page.goto(`https://yourwebsite.com${href}`, { waitUntil: 'domcontentloaded' });
-        await new Promise(resolve => setTimeout(resolve, 10000));
-      }
-
+    console.log(data);
   } catch (error) {
     console.error('An error occurred:', error);
   } finally {
