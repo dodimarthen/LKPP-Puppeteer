@@ -5,15 +5,16 @@ const scrapePpPpk = require('./ScrapPPK.js');
 
 // Add stealth plugin and use defaults
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+const { Page } = require('puppeteer');
 puppeteer.use(StealthPlugin());
 
-const getQuotes = async () => {
+const Scraping = async () => {
   // Record the start time
   const startTime = new Date();
 
   // Start a Puppeteer session:
   const browser = await puppeteer.launch({
-    headless: false,
+    headless: true,
     defaultViewport: null,
   });
 
@@ -26,6 +27,7 @@ const getQuotes = async () => {
     });
 
     // Login
+    console.log("Login process automation..")
     await page.waitForSelector('.input-login[name="username"]');
     await page.type('.input-login[name="username"]', username);
     await page.waitForSelector('.input-login[name="password"]');
@@ -37,18 +39,19 @@ const getQuotes = async () => {
       return document.querySelector('.modal-header h4').textContent;
     });
 
+    console.log("Go to Spesific Paket Data Page..")
     await page.goto("https://e-katalog.lkpp.go.id/v2/id/purchasing/paket/detail/8929530", {
       waitUntil: "domcontentloaded",
     });
 
+    console.log("Scrape Informasi Utama and PP/PPK BMKG Data..")
     await new Promise(resolve => setTimeout(resolve, 5000));
     const informasiUtamaData = await scrapeInformasiUtama(page);
+    const ppkData = await scrapePpPpk(page);
     console.log("Informasi Utama Data:", informasiUtamaData);
-    // const ppkData = await scrapePpPpk(page);
-    // console.log("PpPppk: ", ppkData);
-  
+    console.log("PP/PPK Data:", ppkData)
+    
 
-    console.log(data);
   } catch (error) {
     console.error('An error occurred:', error);
   } finally {
@@ -66,4 +69,4 @@ const getQuotes = async () => {
 };
 
 // Start the scraping
-getQuotes();
+Scraping();
