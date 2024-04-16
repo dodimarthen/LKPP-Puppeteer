@@ -44,7 +44,12 @@ const getQuotes = async () => {
         return links.map(link => link.getAttribute('href'));
       });
     
-      console.log(hrefs);
+      console.log(hrefs); 
+
+      for (const href of hrefs) {
+        await page.goto(`https://yourwebsite.com${href}`, { waitUntil: 'domcontentloaded' });
+        await new Promise(resolve => setTimeout(resolve, 10000));
+      }
 
   } catch (error) {
     console.error('An error occurred:', error);
