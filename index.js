@@ -3,6 +3,7 @@ const { websiteURL, username, password, paketbaruPage } = require('./config.js')
 const scrapeInformasiUtama = require('./ScrapInformasiUtama');
 const scrapePpPpk = require('./ScrapPPK.js');
 const ScrapeKontrak = require('./ScrapSuratKontrak.js');
+const processHref = require('./processHref');
 
 // Add stealth plugin and use defaults
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
@@ -39,24 +40,43 @@ const Scraping = async () => {
     const headerText = await page.evaluate(() => {
       return document.querySelector('.modal-header h4').textContent;
     });
-
-    console.log("Go to Spesific Paket Data Page..")
-    await page.goto("https://e-katalog.lkpp.go.id/v2/id/purchasing/paket/detail/8929530", {
+    
+    await page.goto(paketbaruPage, {
       waitUntil: "domcontentloaded",
     });
 
-    console.log("Scraping Informasi Utama, PP/PPK BMKG data, surat kontrak..")
+    // Wait for the table to load
     await new Promise(resolve => setTimeout(resolve, 2000));
+    await page.waitForSelector('table#tblPenawaran tbody');
+    const hrefs = await page.evaluate(() => {
+        const links = Array.from(document.querySelectorAll('table#tblPenawaran a[target="_blank"]'));
+        return links.map(link => link.getAttribute('href'));
+      });
     
-    const informasiUtamaData = await scrapeInformasiUtama(page);
-    const ppkData = await scrapePpPpk(page);
-    const KontrakData = await ScrapeKontrak(page);
-    
-    console.log (informasiUtamaData),
-    console.log (ppkData),
-    console.log (KontrakData);
-    
+      console.log(hrefs);
 
+      //Loop every href and pull the data
+      for (const href of hrefs) {
+        console.log("Go to Specific Paket Data Page..");
+        await page.goto(`https://e-katalog.lkpp.go.id${href}`, {
+            waitUntil: "domcontentloaded",
+        });
+    
+        console.log("Scraping Informasi Utama, PP/PPK BMKG data, surat kontrak..");
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        //Call function to pull data
+        const informasiUtamaData = await scrapeInformasiUtama(page);
+        const ppkData = await scrapePpPpk(page);
+        // const kontrakData = await ScrapeKontrak(page);
+    
+        // Combine all data into a single array
+        const combinedData = [informasiUtamaData, ppkData];
+        console.log(combinedData);
+        await new Promise(resolve => setTimeout(resolve, 3000));
+    }
+    
+    //Error Handling
   } catch (error) {
     console.error('An error occurred:', error);
   } finally {
