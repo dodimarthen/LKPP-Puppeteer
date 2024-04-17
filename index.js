@@ -2,6 +2,7 @@ const puppeteer = require('puppeteer-extra');
 const { websiteURL, username, password, paketbaruPage } = require('./config.js');
 const scrapeInformasiUtama = require('./ScrapInformasiUtama');
 const scrapePpPpk = require('./ScrapPPK.js');
+const ScrapeKontrak = require('./ScrapSuratKontrak.js');
 
 // Add stealth plugin and use defaults
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
@@ -44,12 +45,16 @@ const Scraping = async () => {
       waitUntil: "domcontentloaded",
     });
 
-    console.log("Scrape Informasi Utama and PP/PPK BMKG Data..")
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    console.log("Scraping Informasi Utama, PP/PPK BMKG data, surat kontrak..")
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
     const informasiUtamaData = await scrapeInformasiUtama(page);
     const ppkData = await scrapePpPpk(page);
-    console.log("Informasi Utama Data:", informasiUtamaData);
-    console.log("PP/PPK Data:", ppkData)
+    const KontrakData = await ScrapeKontrak(page);
+    
+    console.log (informasiUtamaData),
+    console.log (ppkData),
+    console.log (KontrakData);
     
 
   } catch (error) {
