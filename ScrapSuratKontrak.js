@@ -1,10 +1,9 @@
 const ScrapeKontrak = async (page) => {
     // Click the "Daftar Kontrak" button
     console.log("Klik 'daftar kontrak' button");
-    await page.click('a[href="/v2/id/purchasing/paket/8929530/daftar-kontrak"]');
+    await page.click('a[href="/v2/id/purchasing/paket/{hrefnumber}/daftar-kontrak"]');
 
     // Wait for the content to load
-    
     await new Promise(r => setTimeout(r, 1000));
     await page.waitForSelector('.table');
 
