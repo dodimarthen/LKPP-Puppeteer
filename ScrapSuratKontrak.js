@@ -1,10 +1,7 @@
 const ScrapeKontrak = async (page) => {
     try {
-        // Click the "Daftar Kontrak" button
-
         // Wait for the content to load
-        await new Promise(r => setTimeout(r, 1000));
-        await page.waitForSelector('.table');
+        await new Promise(r => setTimeout(r, 2000));
 
         // Now you can scrape the data from the table
         const SuratKontrakItems = await page.evaluate(() => {
@@ -13,8 +10,8 @@ const ScrapeKontrak = async (page) => {
 
             return rows.map(row => {
                 const columns = row.querySelectorAll('td');
-                const noKontrak = columns[0].textContent.trim();
-                const tanggalKontrak = columns[1].textContent.trim();
+                const noKontrak = columns[0] ? columns[0].textContent.trim() : null;
+                const tanggalKontrak = columns[1] ? columns[1].textContent.trim() : null;
                 return { 'No. Kontrak': noKontrak, 'Tanggal Kontrak': tanggalKontrak };
             });
         });
@@ -22,8 +19,9 @@ const ScrapeKontrak = async (page) => {
         // Return the extracted data
         return SuratKontrakItems;
     } catch (error) {
-        // If there's an error (button not found or table not found), return null values
-        return [{ 'No. Kontrak': null, 'Tanggal Kontrak': null }];
+        // Log the error without returning any data
+        console.error('Error scraping data:', error);
+        return []; // Or return null, depending on your use case
     }
 };
 
