@@ -19,7 +19,10 @@ const Scraping = async () => {
     headless: true,
     defaultViewport: null,
   });
+  
 
+
+  // SCRAPING PROCESS
   try {
     // Open a new page
     console.log("Opening the browser..");
@@ -45,46 +48,48 @@ const Scraping = async () => {
       waitUntil: "domcontentloaded",
     });
 
+    //GATHERING DATA
     // Wait for the table to load
     await new Promise(resolve => setTimeout(resolve, 2000));
     await page.waitForSelector('table#tblPenawaran tbody');
     const hrefs = await page.evaluate(() => {
         const links = Array.from(document.querySelectorAll('table#tblPenawaran a[target="_blank"]'));
-        return links.map(link => link.getAttribute('href'));
-        const hrefParts = link.getAttribute('href').split('/');
-        const hrefNumber = hrefParts[hrefParts.length - 1];
-        return hrefNumber;
-      });
-    
-      console.log(hrefs);
-      const hrefKontrak = hrefs.map(hrefNumber => `/v2/id/purchasing/paket/${hrefNumber}/daftar-kontrak`);
-      console.log(hrefKontrak);
+        const hrefsArray = links.map(link => {
+            const hrefParts = link.getAttribute('href').split('/');
+            const hrefNumber = hrefParts[hrefParts.length - 1];
+            return `/v2/id/purchasing/paket/detail/${hrefNumber}`;
+        });
+        return hrefsArray;
+    });
 
+    console.log(hrefs);
 
-
+    const hrefKontrak = hrefs.map(hrefNumber => `${hrefNumber}/daftar-kontrak`);
+    console.log(hrefKontrak);
+        
       
       // Loop every href and pull the data
-    //   for (const href of hrefs) {
-    //     console.log("Go to Specific Paket Data Page..");
-    //     await page.goto(`https://e-katalog.lkpp.go.id${href}`, {
-    //         waitUntil: "domcontentloaded",
-    //     });
+      for (const href of hrefs) {
+        console.log("Go to Specific Paket Data Page..");
+        await page.goto(`https://e-katalog.lkpp.go.id${href}`, {
+            waitUntil: "domcontentloaded",
+        });
     
-    //     console.log("Scraping Informasi Utama, PP/PPK BMKG data, surat kontrak..");
-    //     await new Promise(resolve => setTimeout(resolve, 2000));
+        console.log("Scraping Informasi Utama, PP/PPK BMKG data, surat kontrak..");
+        await new Promise(resolve => setTimeout(resolve, 2000));
         
-    //     // Call function to pull data
-    //     const informasiUtamaData = await scrapeInformasiUtama(page);
-    //     const ppkData = await scrapePpPpk(page);
+        // Call function to pull data
+        const informasiUtamaData = await scrapeInformasiUtama(page);
+        const ppkData = await scrapePpPpk(page);
     
-    //     // Combine all data into a single array
-    //     const combinedData = [informasiUtamaData, ppkData];
-    //     console.log(combinedData);
+        // Combine all data into a single array
+        const combinedData = [informasiUtamaData, ppkData];
+        console.log(combinedData);
         
         
-    //     // pausing every loop
-    //     await new Promise(resolve => setTimeout(resolve, 3000));
-    // }
+        // pausing every loop
+        await new Promise(resolve => setTimeout(resolve, 3000));
+    }
     
     // Error Handling
   } catch (error) {
