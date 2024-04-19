@@ -1,28 +1,22 @@
-const ScrapeKontrak = async (page) => {
-    try {
-        // Wait for the content to load
-        await new Promise(r => setTimeout(r, 2000));
+const puppeteer = require('puppeteer');
 
-        // Now you can scrape the data from the table
-        const SuratKontrakItems = await page.evaluate(() => {
-            // Select only the No. Kontrak and Tanggal Kontrak columns
-            const rows = Array.from(document.querySelectorAll('.table tbody tr'));
+(async () => {
+    await page.waitForSelector('.table');
 
-            return rows.map(row => {
-                const columns = row.querySelectorAll('td');
-                const noKontrak = columns[0] ? columns[0].textContent.trim() : null;
-                const tanggalKontrak = columns[1] ? columns[1].textContent.trim() : null;
-                return { 'No. Kontrak': noKontrak, 'Tanggal Kontrak': tanggalKontrak };
-            });
-        });
+    const contractDetails = await page.evaluate(() => {
+      const table = document.querySelector('.table');
 
-        // Return the extracted data
-        return SuratKontrakItems;
-    } catch (error) {
-        // Log the error without returning any data
-        console.error('Error scraping data:', error);
-        return []; // Or return null, depending on your use case
-    }
-};
+      if (!table) {
+        throw new Error('Table not found');
+      }
 
-module.exports = ScrapeKontrak;
+      const contractNumber = table.querySelector('tbody tr td:nth-child(1)').textContent.trim();
+      const contractDate = table.querySelector('tbody tr td:nth-child(2)').textContent.trim();
+
+      return {'No.Kontrak': contractNumber, 'Tanggal Kontrak': contractDate}
+    });
+
+    console.log(contractDetails);
+
+    await browser.close();
+})();
