@@ -2,8 +2,8 @@ const puppeteer = require('puppeteer-extra');
 const { websiteURL, username, password, paketbaruPage } = require('./config.js');
 const scrapeInformasiUtama = require('./ScrapInformasiUtama');
 const scrapePpPpk = require('./ScrapPPK.js');
-const ScrapeKontrak = require('./ScrapSuratKontrak.js');
-const processHref = require('./processHref');
+const scrapeKontrak = require('./ScrapSuratKontrak.js');
+// const processHref = require('./processHref');
 
 // Add stealth plugin and use defaults
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
@@ -50,7 +50,7 @@ const Scraping = async () => {
 
     //GATHERING DATA
     // Wait for the table to load
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 3000));
     await page.waitForSelector('table#tblPenawaran tbody');
     const hrefs = await page.evaluate(() => {
         const links = Array.from(document.querySelectorAll('table#tblPenawaran a[target="_blank"]'));
@@ -62,12 +62,13 @@ const Scraping = async () => {
         return hrefsArray;
     });
 
-    console.log(hrefs);
+    // console.log(hrefs);
 
-    const hrefKontrak = hrefs.map(hrefNumber => `${hrefNumber}/daftar-kontrak`);
+    const hrefKontrak = hrefs.map(hrefNumber => `${hrefNumber}/daftar-kontrak`.replace('/detail', ''));
     console.log(hrefKontrak);
-        
-      
+    for (const href of hrefKontrak){
+      await scrapeKontrak(page, href);
+    }
       // Loop every href and pull the data
       for (const href of hrefs) {
         console.log("Go to Specific Paket Data Page..");
@@ -77,23 +78,23 @@ const Scraping = async () => {
     
         console.log("Scraping Informasi Utama, PP/PPK BMKG data, surat kontrak..");
         await new Promise(resolve => setTimeout(resolve, 2000));
-        
+    
         // Call function to pull data
         const informasiUtamaData = await scrapeInformasiUtama(page);
         const ppkData = await scrapePpPpk(page);
+        const kontrakData = await scrapeKontrak(page, href); // Added line to scrape kontrak data
     
         // Combine all data into a single array
-        const combinedData = [informasiUtamaData, ppkData];
+        const combinedData = [informasiUtamaData, ppkData, kontrakData]; // Combine kontrakData with the others
         console.log(combinedData);
-        
-        
+    
         // pausing every loop
         await new Promise(resolve => setTimeout(resolve, 3000));
     }
     
     // Error Handling
   } catch (error) {
-    console.error('An error occurred:', error);
+    console.error('An error occurred:', error.stack);
   } finally {
     // Close the browser
     console.log("Closing the browser..");
