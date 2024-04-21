@@ -66,9 +66,12 @@ const Scraping = async () => {
 
     const hrefKontrak = hrefs.map(hrefNumber => `${hrefNumber}/daftar-kontrak`.replace('/detail', ''));
     console.log(hrefKontrak);
+    
+    
     for (const href of hrefKontrak){
       await scrapeKontrak(page, href);
     }
+    
       // Loop every href and pull the data
       for (const href of hrefs) {
         console.log("Go to Specific Paket Data Page..");
@@ -78,16 +81,16 @@ const Scraping = async () => {
     
         console.log("Scraping Informasi Utama, PP/PPK BMKG data, surat kontrak..");
         await new Promise(resolve => setTimeout(resolve, 2000));
-    
+        
         // Call function to pull data
         const informasiUtamaData = await scrapeInformasiUtama(page);
         const ppkData = await scrapePpPpk(page);
-        const kontrakData = await scrapeKontrak(page, href); // Added line to scrape kontrak data
-    
+
         // Combine all data into a single array
-        const combinedData = [informasiUtamaData, ppkData, kontrakData]; // Combine kontrakData with the others
+        const combinedData = [informasiUtamaData, ppkData];
         console.log(combinedData);
-    
+        
+        
         // pausing every loop
         await new Promise(resolve => setTimeout(resolve, 3000));
     }
