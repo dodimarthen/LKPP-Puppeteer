@@ -4,7 +4,6 @@ async function scrapeKontrak(page, href) {
       waitUntil: "domcontentloaded",
   });
   await page.waitForSelector('.table');
-
   const contractDetails = await page.evaluate(() => {
       const table = document.querySelector('.table');
 
