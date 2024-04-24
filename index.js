@@ -76,11 +76,8 @@ const Scraping = async () => {
         console.log("Scraping contract details for :", href); 
         const hrefKontrak = `${href}/daftar-kontrak`.replace('/detail', '');
         const kontrakData = await scrapeKontrak(page, hrefKontrak); 
-        //RiwayatNegosiasi 
-        const hrefRiwayatNego = `${href}/riwayat-negosiasi-produk`.replace('/detail', '');
-        const RiwayatNegoData = await scrapeNegotiationHistory(page, hrefRiwayatNego);
         // Combine all data into a single array
-        const combinedData = [informasiUtamaData, ppkData, kontrakData, RiwayatNegoData];
+        const combinedData = [informasiUtamaData, ppkData, kontrakData];
         console.log(combinedData);
 
         // pausing every loop
