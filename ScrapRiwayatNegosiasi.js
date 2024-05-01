@@ -1,5 +1,5 @@
 const puppeteer = require('puppeteer-extra');
-const { websiteURL, username, password, paketbaruPage } = require('./config.js');
+const { websiteURL, username, password, paketbaruPage, testing_url_scrap_riwayatdata } = require('./config.js');
 
 async function main() {
   const browser = await puppeteer.launch({
@@ -32,7 +32,7 @@ async function main() {
     });
 
     // Navigate to the specific URL containing the table
-    await page.goto({url}, {
+    await page.goto(testing_url_scrap_riwayatdata, {
       waitUntil: "domcontentloaded",
     });
     await new Promise(resolve => setTimeout(resolve, 10000));
@@ -45,7 +45,9 @@ async function main() {
       });
     });
 
-    console.log("Data extracted:", data);
+    const rev1Index = data.findIndex(row => row.includes('Rev. 6'));
+    const rev1Data = rev1Index !== -1 ? data.slice(rev1Index) : [];
+    console.log("Data extracted under 'Rev. 6':", rev1Data);
 
     console.log("Completed!");
     
@@ -56,4 +58,4 @@ async function main() {
   }
 }
 
-main(); 
+main();
