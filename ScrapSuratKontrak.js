@@ -1,5 +1,4 @@
 async function scrapeKontrak(page, href) {
-  console.log("Printing contract details for href:", href);
   await page.goto(`https://e-katalog.lkpp.go.id${href}`, {
       waitUntil: "domcontentloaded",
   });
