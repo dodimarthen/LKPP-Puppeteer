@@ -4,12 +4,10 @@ const scrapeInformasiUtama = require('./ScrapInformasiUtama.js');
 const scrapePpPpk = require('./ScrapPPK.js');
 const scrapeKontrak = require('./ScrapSuratKontrak.js');
 const scrapeStatus = require('./ScrapStatus.js');
-
-
-// Add stealth plugin and use defaults
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const { Page } = require('puppeteer');
 const getStatus = require('./ScrapStatus.js');
+const scrapNego = require('./ScrapRiwayatNegosiasi.js');
 
 puppeteer.use(StealthPlugin());
 
@@ -62,7 +60,7 @@ const Scraping = async () => {
         });
         return hrefsArray;
     });
-    
+
     for (const href of hrefs) {
         // Log the original href
         console.log("Printing contract details for :", href); 
@@ -81,8 +79,11 @@ const Scraping = async () => {
         console.log("Scraping contract details for :", href); 
         const hrefKontrak = `${href}/daftar-kontrak`.replace('/detail', '');
         const kontrakData = await scrapeKontrak(page, hrefKontrak);
+        // Pull data riwayat negosiasi
+        const hrefRiwayatNegosiasi = href.replace('/detail', '/riwayat-negosiasi-produk');
+        const NegosiasiData = await scrapNego(page, hrefRiwayatNegosiasi);
         // Combine all data into a single array
-        const combinedData = [informasiUtamaData, ppkData,statusData, kontrakData];
+        const combinedData = [informasiUtamaData, ppkData,statusData, kontrakData, NegosiasiData];
         console.log(combinedData);
 
         // pausing every loop
