@@ -63,12 +63,11 @@ const Scraping = async () => {
 
     for (const href of hrefs) {
         // Log the original href
-        console.log("Printing contract details for :", href); 
         await page.goto(`https://e-katalog.lkpp.go.id${href}`, {
             waitUntil: "domcontentloaded",
         });
         
-        console.log("Scraping Informasi Utama, PP/PPK BMKG data for :", href);
+        console.log("Scraping Informasi Utama, PP/PPK BMKG, SK, Riwayat Negosiasi data for :", href);
         await new Promise(resolve => setTimeout(resolve, 2000));
 
         // Call function to pull data for informasiUtama and ppkData using the original href
@@ -76,7 +75,6 @@ const Scraping = async () => {
         const ppkData = await scrapePpPpk(page);
         const statusData = await getStatus(page);
         // Log the modified href for kontrakData
-        console.log("Scraping contract details for :", href); 
         const hrefKontrak = `${href}/daftar-kontrak`.replace('/detail', '');
         const kontrakData = await scrapeKontrak(page, hrefKontrak);
         // Pull data riwayat negosiasi
@@ -87,7 +85,7 @@ const Scraping = async () => {
         console.log(combinedData);
 
         // pausing every loop
-        await new Promise(resolve => setTimeout(resolve, 4000));
+        await new Promise(resolve => setTimeout(resolve, 2000));
     }
     
     // Error Handling
