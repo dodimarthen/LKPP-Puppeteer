@@ -1,10 +1,13 @@
-const scrapNego = async (page, url) => {
+const scrapNego = async (page, href) => {
     try {
+        //Debugging process
+        console.log('Scraping data riwayat negosiasi')
         // Navigate to the specific URL containing the table
-        await page.goto(url, {
+        await page.goto(`https://e-katalog.lkpp.go.id${href}`, {
             waitUntil: "domcontentloaded",
         });
-        await new Promise(resolve => setTimeout(resolve, 13000));
+        // adding time.sleep
+        await new Promise(resolve => setTimeout(resolve, 17000));
 
         // Extract data from the table
         const data = await page.evaluate(() => {
