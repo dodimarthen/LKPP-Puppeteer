@@ -32,10 +32,10 @@ async function main() {
     });
 
     // Navigate to the specific URL containing the table
-    await page.goto(testing_url_scrap_riwayatdata, {
+    await page.goto('https://e-katalog.lkpp.go.id/v2/id/purchasing/paket/riwayat-negosiasi-produk/8924646', {
       waitUntil: "domcontentloaded",
     });
-    await new Promise(resolve => setTimeout(resolve, 10000));
+    await new Promise(resolve => setTimeout(resolve, 13000));
     // Extract data from the table
     const data = await page.evaluate(() => {
       const rows = Array.from(document.querySelectorAll('tr.history-item')); 
@@ -44,12 +44,21 @@ async function main() {
         return cells.map(cell => cell.textContent.trim()); 
       });
     });
-
-    const rev1Index = data.findIndex(row => row.includes('Rev. 6'));
-    const rev1Data = rev1Index !== -1 ? data.slice(rev1Index) : [];
-    console.log("Data extracted under 'Rev. 6':", rev1Data);
-
+    
+    // Find the index of the last occurrence of any revision
+    let lastIndex = -1;
+    for (let i = data.length - 1; i >= 0; i--) {
+      if (data[i].some(cell => cell.includes('Rev.'))) {
+        lastIndex = i;
+        break;
+      }
+    }
+    
+    // If found, slice the array from the last occurrence index until the end, else an empty array
+    const revData = lastIndex !== -1 ? data.slice(lastIndex) : [];
+    console.log("Data extracted under the last revision:", revData);
     console.log("Completed!");
+
     
   } catch (error) {
     console.error(error);
