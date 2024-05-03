@@ -33,8 +33,6 @@ const scrapNego = async (page, href) => {
         
         // If found, slice the array from the last occurrence index until the end, else an empty array
         const revData = lastIndex !== -1 ? data.slice(lastIndex) : [];
-        console.log("Data extracted under the last revision:", revData);
-        console.log("Completed!");
 
         return revData;
 
