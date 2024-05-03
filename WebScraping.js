@@ -82,7 +82,14 @@ const Scraping = async () => {
         const NegosiasiData = await scrapNego(page, hrefRiwayatNegosiasi);
         // Combine all data into a single array
         const combinedData = [informasiUtamaData, ppkData,statusData, kontrakData, NegosiasiData];
-        console.log(combinedData);
+        const filteredData = combinedData.filter(data => data !== undefined);
+
+        // Convert the filtered data to JSON format
+        const jsonData = JSON.stringify(filteredData, null, 2);
+    
+        // Print JSON data
+        console.log(jsonData);
+    
 
         // pausing every loop
         await new Promise(resolve => setTimeout(resolve, 2000));
