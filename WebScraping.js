@@ -47,21 +47,23 @@ const Scraping = async () => {
       waitUntil: "domcontentloaded",
     });
 
-    //GATHERING DATA
-    // Wait for the table to load
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    await page.waitForSelector('table#tblPenawaran tbody');
-    const hrefs = await page.evaluate(() => {
-        const links = Array.from(document.querySelectorAll('table#tblPenawaran a[target="_blank"]'));
-        const hrefsArray = links.map(link => {
-            const hrefParts = link.getAttribute('href').split('/');
-            const hrefNumber = hrefParts[hrefParts.length - 1];
-            return `/v2/id/purchasing/paket/detail/${hrefNumber}`;
-        });
-        return hrefsArray;
-    });
+    const allHrefs = [];
 
-    for (const href of hrefs) {
+    for (let i = 1; i <= 14; i++) {
+        console.log("Scraping href from page", i);
+        const hrefs = await scrapeHrefsFromPage(page);
+        allHrefs.push(...hrefs);
+
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        await page.evaluate(() => {
+            const nextPageButton = document.querySelector('.pagination .active + li a');
+            if (nextPageButton) {
+                nextPageButton.click();
+            }
+        });
+    }
+
+    for (const href of allHrefs) {
         // Log the original href
         await page.goto(`https://e-katalog.lkpp.go.id${href}`, {
             waitUntil: "domcontentloaded",
@@ -111,6 +113,21 @@ const Scraping = async () => {
     console.log("Process time:", processTime, "seconds");
   }
 };
+
+async function scrapeHrefsFromPage(page) {
+    await page.waitForSelector('table#tblPenawaran tbody');
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    const hrefs = await page.evaluate(() => {
+        const links = Array.from(document.querySelectorAll('table#tblPenawaran a[target="_blank"]'));
+        const hrefsArray = links.map(link => {
+            const hrefParts = link.getAttribute('href').split('/');
+            const hrefNumber = hrefParts[hrefParts.length - 1];
+            return `/v2/id/purchasing/paket/detail/${hrefNumber}`;
+        });
+        return hrefsArray;
+    });
+    return hrefs;
+}
 
 // Start the scraping
 Scraping();
