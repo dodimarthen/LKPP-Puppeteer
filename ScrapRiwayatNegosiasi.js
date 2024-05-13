@@ -19,7 +19,7 @@ const scrapNego = async (page, href) => {
         
         // Check if there are any history items or cells
         if (data.length === 0 || data.every(row => row.length === 0)) {
-            const keys = ["Revisi", "Tanggal Revisi", "Nama Produk", "Kuantitas", "Mata Uang", "Harga Kesepakatan", "Harga Kesepakatan", "Tanggal Berakhir", "Catatan Tambahan", "Total Harga", "Total Harga Paket"];
+            const keys = ["Revisi", "Tanggal Revisi", "Nama Produk", "Kuantitas", "Mata Uang", "Harga Satuan", "Ongkos Kirim", "Tanggal Pengiriman Produk", "Catatan Tambahan", "Total Harga", "Total Harga Paket"];
             const output = {};
             keys.forEach(key => {
                 output[key] = null;
@@ -40,7 +40,7 @@ const scrapNego = async (page, href) => {
         const revData = lastIndex !== -1 ? data.slice(lastIndex) : [];
 
         // Define keys for each value
-        const keys = ["Revisi", "Tanggal Revisi", "Nama Produk", "Kuantitas", "Mata Uang", "Harga Kesepakatan", "Harga Kesepakatan", "Tanggal Berakhir", "Catatan Tambahan", "Total Harga", "Total Harga Paket"];
+        const keys = ["Revisi", "Tanggal Revisi", "Nama Produk", "Kuantitas", "Mata Uang", "Harga Satuan", "Ongkos Kirim", "Tanggal Pengiriman Produk", "Catatan Tambahan", "Total Harga", "Total Harga Paket"];
         
         // Create an object with keys and values
         const output = {};
