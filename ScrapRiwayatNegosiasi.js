@@ -6,7 +6,7 @@ const scrapNego = async (page, href) => {
             waitUntil: "domcontentloaded",
         });
         // adding time.sleep
-        await new Promise(resolve => setTimeout(resolve, 15000));
+        await new Promise(resolve => setTimeout(resolve, 18000));
 
         // Extract data from the table
         const data = await page.evaluate(() => {
@@ -19,7 +19,12 @@ const scrapNego = async (page, href) => {
         
         // Check if there are any history items or cells
         if (data.length === 0 || data.every(row => row.length === 0)) {
-            return "no history of negotiation";
+            const keys = ["Revisi", "Tanggal Revisi", "Nama Produk", "Kuantitas", "Mata Uang", "Harga Kesepakatan", "Harga Kesepakatan", "Tanggal Berakhir", "Catatan Tambahan", "Total Harga", "Total Harga Paket"];
+            const output = {};
+            keys.forEach(key => {
+                output[key] = null;
+            });
+            return output;
         }
 
         // Find the index of the last occurrence of any revision
@@ -34,11 +39,28 @@ const scrapNego = async (page, href) => {
         // If found, slice the array from the last occurrence index until the end, else an empty array
         const revData = lastIndex !== -1 ? data.slice(lastIndex) : [];
 
-        return revData;
+        // Define keys for each value
+        const keys = ["Revisi", "Tanggal Revisi", "Nama Produk", "Kuantitas", "Mata Uang", "Harga Kesepakatan", "Harga Kesepakatan", "Tanggal Berakhir", "Catatan Tambahan", "Total Harga", "Total Harga Paket"];
+        
+        // Create an object with keys and values
+        const output = {};
+
+        // Check if the data is an array or a single value
+        if (Array.isArray(revData) && revData.length > 0) {
+            revData[0].forEach((value, index) => {
+                output[keys[index]] = value;
+            });
+        } else {
+            keys.forEach(key => {
+                output[key] = null;
+            });
+        }
+
+        return output;
 
     } catch (error) {
         console.error(error);
-        return [];
+        return {};
     }
 };
 
