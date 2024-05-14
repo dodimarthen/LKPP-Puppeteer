@@ -91,15 +91,26 @@ const Scraping = async () => {
       // Pull data riwayat negosiasi
       const hrefRiwayatNegosiasi = href.replace('/detail', '/riwayat-negosiasi-produk');
       const NegosiasiData = await scrapNego(page, hrefRiwayatNegosiasi);
-      // Combine all data into a single array
-      const combinedData = [informasiUtamaData, ppkData, statusData, kontrakData, NegosiasiData];
-      const filteredData = combinedData.filter(data => data !== undefined);
 
-      // Insert data into the database
-      console.log(filteredData)
+      // Combine all data into a single object
+      const combinedData = {
+        ...informasiUtamaData,
+        ...ppkData,
+        ...statusData,
+        ...kontrakData,
+        ...NegosiasiData,
+      };
+
+      // Check the status before inserting into the database
+      if (combinedData.Status !== 'Draft' && combinedData.Status !== 'Paket Batal') {
+        // Insert data into the database
+        await insertDataIntoDB(pool, combinedData);
+      } else {
+        console.log(`Skipping insertion for status: ${combinedData.Status}`);
+      }
 
       // Pausing every loop
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
     // Error Handling
@@ -108,7 +119,7 @@ const Scraping = async () => {
   } finally {
     // Close the browser
     console.log("Closing the browser..");
-    await browser.close();  
+    await browser.close();
 
     // Release the MySQL connection pool
     pool.end();
@@ -137,6 +148,39 @@ async function scrapeHrefsFromPage(page) {
   return hrefs;
 }
 
+async function insertDataIntoDB(pool, data) {
+  try {
+    // Construct the SQL query to insert data into the database table
+    const sql = `
+      INSERT INTO hasil_scrap (
+        nama_pemesan, jabatan_pemesan, nip_pemesan, email_pemesan, no_telp_pemesan,
+        no_sertifikat_pbj_pemesan, nama_pembeli, jabatan_pembeli, nip_pembeli, 
+        email_pembeli, no_telp_pembeli, no_sertifikat_pbj_pembeli, etalase_produk, 
+        id_paket, nama_paket, satuan_kerja, alamat_satuan_kerja, alamat_pengiriman, 
+        no_kontrak, tanggal_kontrak, status_paket, nama_barang, kuantitas_barang, 
+        harga_barang, harga_ongkir, tanggal_pengiriman, total_harga
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+    
+    // Extract values from the combined data object
+    const values = [
+      data.Nama, data.Jabatan, data.NIP, data.Email, data["No. Telp"], data["No. Sertifikat PBJ"],
+      data.Nama, data.Jabatan, data.NIP, data.Email, data["No. Telp"], data["No. Sertifikat PBJ"],
+      data["Etalase Produk"], data["ID Paket"], data["Nama Paket"], data["Satuan Kerja"], 
+      data["Alamat Satuan Kerja"], data["Alamat Pengiriman"], data["No.Kontrak"], 
+      data["Tanggal Kontrak"], data.Status, data["Nama Produk"], data.Kuantitas, 
+      data["Harga Satuan"], data["Ongkos Kirim"], data["Tanggal Pengiriman Produk"], data["Total Harga"]
+    ];
+
+    // Execute the SQL query
+    await pool.query(sql, values);
+    
+    console.log('Data inserted successfully:', data);
+
+  } catch (error) {
+    console.error('Error inserting data:', error);
+  }
+}
 
 // Call the Scraping function
 Scraping();
