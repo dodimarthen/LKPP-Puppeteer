@@ -6,7 +6,7 @@ const scrapNego = async (page, href) => {
             waitUntil: "domcontentloaded",
         });
         // adding time.sleep
-        await new Promise(resolve => setTimeout(resolve, 18000));
+        await new Promise(resolve => setTimeout(resolve, 16000));
 
         // Extract data from the table
         const data = await page.evaluate(() => {
