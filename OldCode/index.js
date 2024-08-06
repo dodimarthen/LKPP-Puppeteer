@@ -1,13 +1,18 @@
 const puppeteer = require("puppeteer-extra");
 const mysql = require("mysql2/promise");
-const {websiteURL, username, password, paketbaruPage, LoginPageLKPP} = require("./config.js");
-const scrapeInformasiUtama = require("./DataExtraction/ScrapInformasiUtama.js");
-const scrapePpPpk = require("./DataExtraction/ScrapPPK.js");
-const scrapeKontrak = require("./DataExtraction/ScrapSuratKontrak.js");
-const getStatus = require("./DataExtraction/ScrapStatus.js");
-const scrapNego = require("./DataExtraction/ScrapRiwayatNegosiasi.js");
+const {
+  websiteURL,
+  username,
+  password,
+  paketbaruPage,
+  LoginPageLKPP,
+} = require("../config.js");
+const scrapeInformasiUtama = require("../DataExtraction/ScrapInformasiUtama.js");
+const scrapePpPpk = require("../DataExtraction/ScrapPPK.js");
+const scrapeKontrak = require("../DataExtraction/ScrapSuratKontrak.js");
+const getStatus = require("../DataExtraction/ScrapStatus.js");
+const scrapNego = require("../DataExtraction/ScrapRiwayatNegosiasi.js");
 const StealthPlugin = require("puppeteer-extra-plugin-stealth");
-// const { insertDataIntoDB } = require("./InsertData.js");
 
 puppeteer.use(StealthPlugin());
 
@@ -21,7 +26,6 @@ const Scraping = async () => {
     defaultViewport: null,
   });
 
-  
   // SCRAPING PROCESS
   try {
     // Open a new page
@@ -84,19 +88,21 @@ const Scraping = async () => {
         const hrefKontrak = `${href}/daftar-kontrak`.replace("/detail", "");
         const kontrakData = await scrapeKontrak(page, hrefKontrak);
         //Pull data riwayat negosiasi
-        // const hrefRiwayatNegosiasi = href.replace('/detail', '/riwayat-negosiasi-produk');
-        // const negosiasiData = await scrapNego(page, hrefRiwayatNegosiasi);
-        // console.log(negosiasiData);
-        // Combine all data into a single object
+        const hrefRiwayatNegosiasi = href.replace(
+          "/detail",
+          "/riwayat-negosiasi-produk"
+        );
+        const negosiasiData = await scrapNego(page, hrefRiwayatNegosiasi);
+        console.log(negosiasiData);
+        //Combine all data into a single object
         const combinedData = {
           ...informasiUtamaData,
           ...ppkData,
           ...statusData,
           ...kontrakData,
-          // ...negosiasiData,
+          ...negosiasiData,
         };
         console.log(combinedData);
-
 
         // Pausing every loop
         await new Promise((resolve) => setTimeout(resolve, 3000));

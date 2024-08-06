@@ -1,3 +1,6 @@
 /config.js
 node_modules
 tmp
+.vs/
+.wwebjs_auth/
+__pycache__/

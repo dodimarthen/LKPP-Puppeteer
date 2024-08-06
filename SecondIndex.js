@@ -1,5 +1,5 @@
 import puppeteer from "puppeteer";
-import { username, password, LoginPageLKPP } from "./config.js";
+import { username, password, LoginPageLKPP, paketbaruPage } from "./config.js";
 
 const login = async () => {
   const browser = await puppeteer.launch({
@@ -26,6 +26,17 @@ const login = async () => {
       waitUntil: "domcontentloaded",
     });
     console.log("Menu is showed successfully, login succeed!");
+    await page.goto(paketbaruPage, { waitUntil: "domcontentloaded" });
+    await page
+      .waitForSelector(".col-md-12")
+      .then(() => console.log("Daftar paket shown!"));
+
+    const h4Text = await page.evaluate(() => {
+      const element = document.querySelector(".col-md-12 h4");
+      return element ? element.innerText : null;
+    });
+
+    console.log("Text in <h4>:", h4Text);
   } catch (error) {
     console.error("Error waiting for selector:", error);
   } finally {
