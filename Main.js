@@ -2,7 +2,7 @@ import puppeteer from "puppeteer";
 import { username, password, LoginPageLKPP, paketbaruPage } from "./config.js";
 import { logTableLinks } from "./StatusPaket.js";
 
-const login = async () => {
+const scrapAll = async () => {
   const browser = await puppeteer.launch({
     headless: true,
   });
@@ -37,8 +37,6 @@ const login = async () => {
       return element ? element.innerText : null;
     });
 
-    console.log("Text in <h4>:", h4Text);
-
     // Wait for the page to settle before calling logTableLinks
     await new Promise((resolve) => setTimeout(resolve, 3000));
     await logTableLinks(page);
@@ -49,4 +47,4 @@ const login = async () => {
   }
 };
 
-login();
+scrapAll();

@@ -7,14 +7,20 @@ export async function logTableLinks(page) {
       return Array.from(rows)
         .map((row) => {
           const anchor = row.querySelector("a[href*='detail']");
-          const href = anchor ? anchor.href : null;
-          const td11 = row.cells[12] ? row.cells[12].innerText.trim() : null;
+          const Url_Paket = anchor ? anchor.href : null;
+          const Status_Paket = row.cells[12]
+            ? row.cells[12].innerText.trim()
+            : null;
+          const ID_Paket = anchor
+            ? anchor.querySelector("strong")?.innerText.trim()
+            : null;
 
           if (
-            href &&
-            (td11 === "Proses negosiasi" || td11 === "Proses kontrak ppk")
+            Url_Paket &&
+            (Status_Paket === "Proses negosiasi" ||
+              Status_Paket === "Proses kontrak ppk")
           ) {
-            return { href, td11 };
+            return { Url_Paket, Status_Paket, ID_Paket };
           }
           return null;
         })
@@ -22,12 +28,13 @@ export async function logTableLinks(page) {
     });
 
     data.forEach((item) => {
-      console.log(item.href);
+      console.log(item.Url_Paket);
     });
+
     const results = [];
 
     for (const item of data) {
-      await page.goto(item.href);
+      await page.goto(item.Url_Paket); // Updated to Url_Paket
       const tableNegoResult = await TableNego(page);
       const pairedResult = { ...item, tableNegoResult };
       results.push(pairedResult);
