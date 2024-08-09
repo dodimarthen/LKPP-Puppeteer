@@ -1,5 +1,6 @@
 import puppeteer from "puppeteer";
 import { username, password, LoginPageLKPP, paketbaruPage } from "./config.js";
+import { logTableLinks } from "./StatusPaket.js";
 
 const login = async () => {
   const browser = await puppeteer.launch({
@@ -26,10 +27,10 @@ const login = async () => {
       waitUntil: "domcontentloaded",
     });
     console.log("Menu is showed successfully, login succeed!");
+
     await page.goto(paketbaruPage, { waitUntil: "domcontentloaded" });
-    await page
-      .waitForSelector(".col-md-12")
-      .then(() => console.log("Daftar paket shown!"));
+    await page.waitForSelector(".col-md-12");
+    console.log("Daftar paket shown!");
 
     const h4Text = await page.evaluate(() => {
       const element = document.querySelector(".col-md-12 h4");
@@ -37,6 +38,10 @@ const login = async () => {
     });
 
     console.log("Text in <h4>:", h4Text);
+
+    // Wait for the page to settle before calling logTableLinks
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+    await logTableLinks(page);
   } catch (error) {
     console.error("Error waiting for selector:", error);
   } finally {
