@@ -1,6 +1,6 @@
 import puppeteer from "puppeteer";
 import { username, password, LoginPageLKPP, paketbaruPage } from "./config.js";
-import { logTableLinks } from "./StatusPaket.js";
+import { logTableLinks, processTableLinks } from "./StatusPaket.js";
 
 const scrapAll = async () => {
   const browser = await puppeteer.launch({
@@ -30,18 +30,44 @@ const scrapAll = async () => {
 
     await page.goto(paketbaruPage, { waitUntil: "domcontentloaded" });
     await page.waitForSelector(".col-md-12");
-    console.log("Daftar paket shown!");
 
-    const h4Text = await page.evaluate(() => {
-      const element = document.querySelector(".col-md-12 h4");
-      return element ? element.innerText : null;
-    });
-
-    // Wait for the page to settle before calling logTableLinks
     await new Promise((resolve) => setTimeout(resolve, 3000));
-    await logTableLinks(page);
+
+    // Array to hold all collected links
+    let allLinks = [];
+    let currentPage = 1;
+    const totalPages = 2;
+
+    while (currentPage <= totalPages) {
+      const pageLinks = await logTableLinks(page);
+      allLinks = allLinks.concat(pageLinks);
+
+      // Wait before moving to the next page
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
+      // Check if there's a next page and if it's not the last page
+      if (currentPage < totalPages) {
+        await page.click(".pagination li:nth-child(4) a");
+        await page.waitForSelector(".col-md-12", {
+          waitUntil: "domcontentloaded",
+        });
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        currentPage++;
+      } else {
+        break;
+      }
+    }
+
+    // console.log("All collected links:", allLinks);
+
+    // Process the collected links (if needed)
+    if (allLinks.length > 0) {
+      await processTableLinks(page, allLinks);
+    } else {
+      console.log("No links found to process.");
+    }
   } catch (error) {
-    console.error("Error waiting for selector:", error);
+    console.error("Error during the scraping process:", error);
   } finally {
     await browser.close();
   }

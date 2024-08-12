@@ -1,5 +1,7 @@
+import { json } from "express";
 import { TableNego } from "./HargaNegosiasi.js";
 
+// Function to log table links
 export async function logTableLinks(page) {
   try {
     const data = await page.evaluate(() => {
@@ -31,18 +33,23 @@ export async function logTableLinks(page) {
       console.log(item.Url_Paket);
     });
 
-    const results = [];
-
-    for (const item of data) {
-      await page.goto(item.Url_Paket); // Updated to Url_Paket
-      const tableNegoResult = await TableNego(page);
-      const pairedResult = { ...item, tableNegoResult };
-      results.push(pairedResult);
-      console.log(pairedResult);
-    }
-
-    return results;
+    return data;
   } catch (error) {
     console.error(`Error fetching data: ${error.message}`);
   }
+}
+
+// Separate function to process each item
+export async function processTableLinks(page, data) {
+  const results = [];
+
+  for (const item of data) {
+    await page.goto(item.Url_Paket);
+    const tableNegoResult = await TableNego(page);
+    const pairedResult = { ...item, tableNegoResult };
+    results.push(pairedResult);
+    console.log(pairedResult);
+  }
+
+  return results;
 }
