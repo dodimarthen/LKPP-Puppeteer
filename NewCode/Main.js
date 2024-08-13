@@ -1,6 +1,11 @@
 import puppeteer from "puppeteer";
 import { username, password, LoginPageLKPP, paketbaruPage } from "../config.js";
 import { logTableLinks, processTableLinks } from "./StatusPaket.js";
+import { insertData } from "./setupSQL.js";
+
+const formatNegosiasiResult = (negosiasiResult) => {
+  return JSON.stringify(negosiasiResult);
+};
 
 const scrapAll = async () => {
   const browser = await puppeteer.launch({
@@ -26,7 +31,7 @@ const scrapAll = async () => {
     await page.waitForSelector(".main-wrapper", {
       waitUntil: "domcontentloaded",
     });
-    console.log("Menu is showed successfully, login succeed!");
+    console.log("Menu is shown successfully, login succeeded!");
 
     await page.goto(paketbaruPage, { waitUntil: "domcontentloaded" });
     await page.waitForSelector(".col-md-12");
@@ -58,11 +63,15 @@ const scrapAll = async () => {
       }
     }
 
-    // console.log("All collected links:", allLinks);
-
-    // Process the collected links (if needed)
+    // Process and save the collected links
     if (allLinks.length > 0) {
-      await processTableLinks(page, allLinks);
+      const results = await processTableLinks(page, allLinks);
+
+      for (const result of results) {
+        const { Url_Paket, Status_Paket, ID_Paket, tableNegoResult } = result;
+        const negosiasiResult = formatNegosiasiResult(tableNegoResult);
+        await insertData(ID_Paket, Status_Paket, Url_Paket, negosiasiResult);
+      }
     } else {
       console.log("No links found to process.");
     }
