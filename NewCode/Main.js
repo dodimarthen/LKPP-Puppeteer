@@ -1,7 +1,7 @@
 import puppeteer from "puppeteer";
 import { username, password, LoginPageLKPP, paketbaruPage } from "../config.js";
 import { logTableLinks, processTableLinks } from "./StatusPaket.js";
-import { insertData } from "./setupSQL.js";
+import { insertData, closeConnection } from "./setupsql.js";
 
 const formatNegosiasiResult = (negosiasiResult) => {
   return JSON.stringify(negosiasiResult);
@@ -79,6 +79,7 @@ const scrapAll = async () => {
     console.error("Error during the scraping process:", error);
   } finally {
     await browser.close();
+    closeConnection();
   }
 };
 

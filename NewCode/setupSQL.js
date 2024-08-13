@@ -20,6 +20,8 @@ con.connect(function (err) {
   }
   console.log("Connected to the database!");
 });
+
+// Function to insert data into the database
 export const insertData = async (
   ID_Paket,
   Status_Paket,
@@ -41,5 +43,16 @@ export const insertData = async (
         resolve(result.insertId);
       }
     );
+  });
+};
+
+// Function to close the database connection
+export const closeConnection = () => {
+  con.end(function (err) {
+    if (err) {
+      console.error("Error closing the database connection:", err);
+      return;
+    }
+    console.log("Database connection closed.");
   });
 };
