@@ -56,7 +56,7 @@ const scrapAll = async () => {
         await page.waitForSelector(".col-md-12", {
           waitUntil: "domcontentloaded",
         });
-        await new Promise((resolve) => setTimeout(resolve, 3000));
+        await new Promise((resolve) => setTimeout(resolve, 5000));
         currentPage++;
       } else {
         break;
