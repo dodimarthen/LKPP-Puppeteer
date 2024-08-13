@@ -25,7 +25,6 @@ export async function TableNego(page) {
       });
       return result;
     });
-
     return data;
   } catch (error) {
     console.error(`Error fetching data: ${error.message}`);

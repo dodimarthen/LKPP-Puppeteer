@@ -29,9 +29,9 @@ export async function logTableLinks(page) {
         .filter((item) => item !== null);
     });
 
-    data.forEach((item) => {
-      console.log(item.Url_Paket);
-    });
+    // data.forEach((item) => {
+    //   console.log(item.Url_Paket);
+    // });
 
     return data;
   } catch (error) {

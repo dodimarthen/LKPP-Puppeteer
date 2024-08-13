@@ -1,5 +1,5 @@
 import puppeteer from "puppeteer";
-import { username, password, LoginPageLKPP, paketbaruPage } from "./config.js";
+import { username, password, LoginPageLKPP, paketbaruPage } from "../config.js";
 import { logTableLinks, processTableLinks } from "./StatusPaket.js";
 
 const scrapAll = async () => {
