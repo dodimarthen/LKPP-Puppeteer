@@ -46,6 +46,52 @@ export const insertData = async (
   });
 };
 
+// Function to check if data exists in the database
+export const checkExistingData = async (ID_Paket) => {
+  const sql = `SELECT * FROM LKPP WHERE ID_Paket = ?`;
+
+  return new Promise((resolve, reject) => {
+    con.query(sql, [ID_Paket], function (err, result) {
+      if (err) {
+        console.error("Error checking data:", err);
+        return reject(err);
+      }
+      if (result.length > 0) {
+        console.log(`Data found for ID_Paket ${ID_Paket}`);
+        resolve(result[0]); // Return the existing record
+      } else {
+        console.log(`No data found for ID_Paket ${ID_Paket}`);
+        resolve(null);
+      }
+    });
+  });
+};
+
+// Function to update existing data in the database
+export const updateData = async (
+  ID_Paket,
+  Status_Paket,
+  Url_Paket,
+  Negosiasi_Result
+) => {
+  const sql = `UPDATE LKPP SET Status_Paket = ?, Url_Paket = ?, Negosiasi_Result = ? WHERE ID_Paket = ?`;
+
+  return new Promise((resolve, reject) => {
+    con.query(
+      sql,
+      [Status_Paket, Url_Paket, Negosiasi_Result, ID_Paket],
+      function (err, result) {
+        if (err) {
+          console.error("Error updating data:", err);
+          return reject(err);
+        }
+        console.log(`Data updated successfully for ID_Paket ${ID_Paket}`);
+        resolve(result);
+      }
+    );
+  });
+};
+
 // Function to close the database connection
 export const closeConnection = () => {
   con.end(function (err) {

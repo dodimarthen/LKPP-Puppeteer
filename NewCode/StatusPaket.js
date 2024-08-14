@@ -20,7 +20,8 @@ export async function logTableLinks(page) {
           if (
             Url_Paket &&
             (Status_Paket === "Proses negosiasi" ||
-              Status_Paket === "Proses kontrak ppk")
+              Status_Paket === "Proses kontrak ppk" ||
+              Status_Paket === "Mengirimkan ke ppk")
           ) {
             return { Url_Paket, Status_Paket, ID_Paket };
           }

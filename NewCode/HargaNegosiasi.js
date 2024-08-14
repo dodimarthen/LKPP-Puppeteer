@@ -1,8 +1,11 @@
 export async function TableNego(page) {
   try {
-    await new Promise((resolve) => setTimeout(resolve, 7000));
+    await new Promise((resolve) => setTimeout(resolve, 8000));
 
-    await page.waitForSelector(".panel-body .detail-list");
+    await page.waitForSelector(".panel-body .detail-list", {
+      timeout: 20000,
+      visible: true,
+    });
 
     const data = await page.evaluate(() => {
       const rows = document.querySelectorAll(

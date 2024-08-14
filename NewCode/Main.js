@@ -1,7 +1,12 @@
 import puppeteer from "puppeteer";
 import { username, password, LoginPageLKPP, paketbaruPage } from "../config.js";
 import { logTableLinks, processTableLinks } from "./StatusPaket.js";
-import { insertData, closeConnection } from "./setupsql.js";
+import {
+  insertData,
+  updateData,
+  checkExistingData,
+  closeConnection,
+} from "./setupSQL.js";
 
 const formatNegosiasiResult = (negosiasiResult) => {
   return JSON.stringify(negosiasiResult);
@@ -36,9 +41,7 @@ const scrapAll = async () => {
     await page.goto(paketbaruPage, { waitUntil: "domcontentloaded" });
     await page.waitForSelector(".col-md-12");
 
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-
-    // Array to hold all collected links
+    await new Promise((resolve) => setTimeout(resolve, 6000));
     let allLinks = [];
     let currentPage = 1;
     const totalPages = 2;
@@ -70,7 +73,29 @@ const scrapAll = async () => {
       for (const result of results) {
         const { Url_Paket, Status_Paket, ID_Paket, tableNegoResult } = result;
         const negosiasiResult = formatNegosiasiResult(tableNegoResult);
-        await insertData(ID_Paket, Status_Paket, Url_Paket, negosiasiResult);
+
+        // Check if the record already exists
+        const existingData = await checkExistingData(ID_Paket);
+
+        if (existingData) {
+          // Compare the existing negosiasiResult with the new one
+          if (existingData.negosiasiResult !== negosiasiResult) {
+            // Update the existing record
+            await updateData(
+              ID_Paket,
+              Status_Paket,
+              Url_Paket,
+              negosiasiResult
+            );
+          } else {
+            console.log(
+              `No changes detected for ID_Paket ${ID_Paket}, skipping update.`
+            );
+          }
+        } else {
+          // Insert new record if it doesn't exist
+          await insertData(ID_Paket, Status_Paket, Url_Paket, negosiasiResult);
+        }
       }
     } else {
       console.log("No links found to process.");
