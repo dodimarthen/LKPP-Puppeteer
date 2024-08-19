@@ -1,9 +1,9 @@
 export async function TableNego(page) {
   try {
-    await new Promise((resolve) => setTimeout(resolve, 8000));
+    await new Promise((resolve) => setTimeout(resolve, 10000));
 
     await page.waitForSelector(".panel-body .detail-list", {
-      timeout: 20000,
+      timeout: 8000,
       visible: true,
     });
 

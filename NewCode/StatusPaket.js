@@ -1,4 +1,3 @@
-import { json } from "express";
 import { TableNego } from "./HargaNegosiasi.js";
 
 // Function to log table links
