@@ -21,7 +21,6 @@ con.connect(function (err) {
   console.log("Connected to the database!");
 });
 
-// Function to insert data into the database
 export const insertData = async (
   ID_Paket,
   Status_Paket,
@@ -29,11 +28,12 @@ export const insertData = async (
   Negosiasi_Result
 ) => {
   const sql = `INSERT INTO LKPP (ID_Paket, Status_Paket, Url_Paket, Negosiasi_Result) VALUES (?, ?, ?, ?)`;
+  const negosiasiResultString = JSON.stringify(Negosiasi_Result);
 
   return new Promise((resolve, reject) => {
     con.query(
       sql,
-      [ID_Paket, Status_Paket, Url_Paket, Negosiasi_Result],
+      [ID_Paket, Status_Paket, Url_Paket, negosiasiResultString],
       function (err, result) {
         if (err) {
           console.error("Error inserting data:", err);
@@ -75,11 +75,12 @@ export const updateData = async (
   Negosiasi_Result
 ) => {
   const sql = `UPDATE LKPP SET Status_Paket = ?, Url_Paket = ?, Negosiasi_Result = ? WHERE ID_Paket = ?`;
+  const negosiasiResultString = JSON.stringify(Negosiasi_Result);
 
   return new Promise((resolve, reject) => {
     con.query(
       sql,
-      [Status_Paket, Url_Paket, Negosiasi_Result, ID_Paket],
+      [Status_Paket, Url_Paket, negosiasiResultString, ID_Paket],
       function (err, result) {
         if (err) {
           console.error("Error updating data:", err);
@@ -91,7 +92,6 @@ export const updateData = async (
     );
   });
 };
-
 // Function to close the database connection
 export const closeConnection = () => {
   con.end(function (err) {
