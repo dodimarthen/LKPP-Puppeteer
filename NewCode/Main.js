@@ -1,135 +1,12 @@
-// import puppeteer from "puppeteer";
-// import {
-//   username,
-//   password,
-//   LoginPageLKPP,
-//   paketbaruPage,
-//   user_email_mailer,
-//   password_email_mailer,
-// } from "../config.js";
-// import { logTableLinks, processTableLinks } from "./StatusPaket.js";
-// import {
-//   insertData,
-//   updateData,
-//   checkExistingData,
-//   closeConnection,
-// } from "./setupSQL.js";
-// import cron from "node-cron";
-// import nodemailer from "nodemailer";
-
-// const formatNegosiasiResult = (negosiasiResult) => {
-//   return JSON.stringify(negosiasiResult);
-// };
-
-// const sendNotificationEmail = async (updatedRevisions) => {
-//   if (updatedRevisions.length === 0) {
-//     return; // No changes, no email
-//   }
-
-//   const transporter = nodemailer.createTransport({
-//     service: "gmail",
-//     auth: {
-//       user: user_email_mailer,
-//       pass: password_email_mailer,
-//     },
-//   });
-
-//   const mailOptions = {
-//     from: "dodimarthen.sit@gmail.com",
-//     to: "dodimartin.sit@gmail.com",
-//     subject: "Data Update Notification",
-//     text: `The following revisions were added:\n\n${JSON.stringify(
-//       updatedRevisions,
-//       null,
-//       2
-//     )}`,
-//   };
-
-//   try {
-//     await transporter.sendMail(mailOptions);
-//     console.log("Notification email sent successfully");
-//   } catch (error) {
-//     console.error("Error sending notification email:", error);
-//   }
-// };
-
-// const scrapAll = async () => {
-//   const browser = await puppeteer.launch({
-//     headless: true,
-//   });
-
-//   const page = await browser.newPage();
-//   await page.goto(LoginPageLKPP, { waitUntil: "domcontentloaded" });
-
-//   const updatedRevisions = [];
-
-//   try {
-//     // (login and navigate as before...)
-
-//     const results = await processTableLinks(page, allLinks);
-
-//     for (const result of results) {
-//       const { ID_Paket, tableNegoResult } = result;
-
-//       // Check if the record already exists
-//       const existingData = await checkExistingData(ID_Paket);
-
-//       if (existingData) {
-//         // Find new revisions by comparing the old and new tableNegoResult
-//         const oldRevisions = existingData.tableNegoResult;
-//         const newRevisions = tableNegoResult.filter(
-//           (newRev) =>
-//             !oldRevisions.some(
-//               (oldRev) => JSON.stringify(oldRev) === JSON.stringify(newRev)
-//             )
-//         );
-
-//         if (newRevisions.length > 0) {
-//           // Update the existing record with the new revisions
-//           await updateData(
-//             ID_Paket,
-//             result.Status_Paket,
-//             result.Url_Paket,
-//             tableNegoResult
-//           );
-//           updatedRevisions.push({ ID_Paket, newRevisions });
-//         } else {
-//           console.log(
-//             `No new revisions detected for ID_Paket ${ID_Paket}, skipping update.`
-//           );
-//         }
-//       } else {
-//         // Insert new record if it doesn't exist
-//         await insertData(
-//           ID_Paket,
-//           result.Status_Paket,
-//           result.Url_Paket,
-//           tableNegoResult
-//         );
-//         updatedRevisions.push({ ID_Paket, newRevisions: tableNegoResult });
-//       }
-//     }
-//   } catch (error) {
-//     console.error("Error during the scraping process:", error);
-//   } finally {
-//     await browser.close();
-//     closeConnection();
-//     return updatedRevisions;
-//   }
-// };
-
-// // Schedule the script to run 3 times a day (e.g., at 6 AM, 2 PM, and 10 PM)
-// cron.schedule("0 8,13,16 * * *", async () => {
-//   console.log("Running scheduled task");
-//   try {
-//     const updatedRecords = await scrapAll();
-//     await sendNotificationEmail(updatedRecords);
-//   } catch (error) {
-//     console.error("Error during scheduled task:", error);
-//   }
-// });
 import puppeteer from "puppeteer";
-import { username, password, LoginPageLKPP, paketbaruPage } from "../config.js";
+import {
+  username,
+  password,
+  LoginPageLKPP,
+  paketbaruPage,
+  user_email_mailer,
+  password_email_mailer,
+} from "../config.js";
 import { logTableLinks, processTableLinks } from "./StatusPaket.js";
 import {
   insertData,
@@ -137,9 +14,55 @@ import {
   checkExistingData,
   closeConnection,
 } from "./setupSQL.js";
+import nodemailer from "nodemailer";
+import cron from "node-cron";
 
-const formatNegosiasiResult = (negosiasiResult) => {
-  return JSON.stringify(negosiasiResult);
+// Function to find new elements in the tableNegoResult
+const findNewElements = (existingData, newData) => {
+  if (!existingData || !existingData.tableNegoResult) {
+    console.log("No existing data found, no new elements to report.");
+    return []; // Return an empty array if no existing data
+  }
+
+  const existingRevisi = existingData.tableNegoResult.map(
+    (item) => item.revisi
+  );
+  const newElements = newData.filter(
+    (item) => !existingRevisi.includes(item.revisi)
+  );
+
+  console.log(`New elements detected: ${JSON.stringify(newElements, null, 2)}`);
+  return newElements;
+};
+
+// Function to send a notification email
+const sendNotificationEmail = async (ID_Paket, newElements) => {
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: user_email_mailer,
+      pass: password_email_mailer,
+    },
+  });
+
+  // Get the last element from newElements array
+  const lastElement = newElements[newElements.length - 1];
+
+  const newElementsText = `Revisi: ${lastElement.revisi}, Oleh: ${lastElement.oleh}, Total Harga: ${lastElement.totalHarga}`;
+
+  const mailOptions = {
+    from: user_email_mailer,
+    to: "dodimartin.sit@gmail.com",
+    subject: `Paket ${ID_Paket} terdapat perubahan data pada tabel negosiasi`,
+    text: `Paket ${ID_Paket} terdapat perubahan data pada tabel negosiasi.\n\nLast Element:\n${newElementsText}`,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`Notification email sent for Paket ${ID_Paket}`);
+  } catch (error) {
+    console.error("Error sending notification email:", error);
+  }
 };
 
 const scrapAll = async () => {
@@ -180,9 +103,6 @@ const scrapAll = async () => {
       const pageLinks = await logTableLinks(page);
       allLinks = allLinks.concat(pageLinks);
 
-      // Wait before moving to the next page
-
-      // Check if there's a next page and if it's not the last page
       if (currentPage < totalPages) {
         await page.click(".pagination li:nth-child(4) a");
         await new Promise((resolve) => setTimeout(resolve, 10000));
@@ -196,35 +116,41 @@ const scrapAll = async () => {
       }
     }
 
-    // Process and save the collected links
     if (allLinks.length > 0) {
       const results = await processTableLinks(page, allLinks);
 
       for (const result of results) {
         const { Url_Paket, Status_Paket, ID_Paket, tableNegoResult } = result;
-        const negosiasiResult = formatNegosiasiResult(tableNegoResult);
 
-        // Check if the record already exists
+        console.log(
+          `Scraped data for Paket ${ID_Paket}:`,
+          JSON.stringify(result, null, 2)
+        );
+
         const existingData = await checkExistingData(ID_Paket);
+        console.log(
+          `Existing data for Paket ${ID_Paket}:`,
+          JSON.stringify(existingData, null, 2)
+        );
 
         if (existingData) {
-          // Compare the existing negosiasiResult with the new one
-          if (existingData.negosiasiResult !== negosiasiResult) {
-            // Update the existing record
+          const newElements = findNewElements(existingData, tableNegoResult);
+          if (newElements.length > 0) {
             await updateData(
               ID_Paket,
               Status_Paket,
               Url_Paket,
-              negosiasiResult
+              tableNegoResult
             );
+            await sendNotificationEmail(ID_Paket, newElements);
           } else {
             console.log(
-              `No changes detected for ID_Paket ${ID_Paket}, skipping update.`
+              `No new elements detected for Paket ${ID_Paket}, skipping update.`
             );
           }
         } else {
-          // Insert new record if it doesn't exist
-          await insertData(ID_Paket, Status_Paket, Url_Paket, negosiasiResult);
+          await insertData(ID_Paket, Status_Paket, Url_Paket, tableNegoResult);
+          console.log(`Inserted new record for Paket ${ID_Paket}`);
         }
       }
     } else {
@@ -234,8 +160,17 @@ const scrapAll = async () => {
     console.error("Error during the scraping process:", error);
   } finally {
     await browser.close();
-    closeConnection();
   }
 };
 
+cron.schedule("0 * * * *", async () => {
+  console.log("Running scheduled task");
+  try {
+    await scrapAll();
+  } catch (error) {
+    console.error("Error during scheduled task:", error);
+  }
+});
+
+// Start the initial scraping process
 scrapAll();
