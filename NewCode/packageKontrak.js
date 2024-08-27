@@ -33,21 +33,16 @@ export async function logInformasiDaftarKontrak(page) {
         }),
       ]);
 
-      // Extract and log "No. Kontrak" and "Tanggal Kontrak"
-      const contractInfo = await page.evaluate(() => {
-        const noKontrak =
+      // Extract and log "No. Kontrak" only
+      const noKontrak = await page.evaluate(() => {
+        return (
           document.querySelector(
             "table.table-condensed.table-striped tbody tr td:nth-child(1)"
-          )?.innerText || "Not available";
-        const tanggalKontrak =
-          document.querySelector(
-            "table.table-condensed.table-striped tbody tr td:nth-child(2)"
-          )?.innerText || "Not available";
-        return { noKontrak, tanggalKontrak };
+          )?.innerText || "Kontrak tidak tersedia"
+        );
       });
 
-      console.log(`No. Kontrak: ${contractInfo.noKontrak}`);
-      console.log(`Tanggal Kontrak: ${contractInfo.tanggalKontrak}`);
+      console.log(`No. Kontrak: ${noKontrak}`);
     } else {
       console.log('Button "Daftar Kontrak" is not visible yet.');
     }

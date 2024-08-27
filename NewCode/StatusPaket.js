@@ -1,5 +1,8 @@
 import { TableNego } from "./HargaNegosiasi.js";
-import { logInformasiUtamaPemesanPPK } from "./MainPage.js";
+import { combineOutputs, logInformasiUtamaPemesanPPK } from "./MainPage.js";
+import { logInformasiDaftarKontrak } from "./packageKontrak.js";
+import { insertDataiuppk } from "./setupSQL_2.js";
+
 // Function to log table links
 export async function logTableLinks(page) {
   try {
@@ -55,13 +58,16 @@ export async function processTableLinks(page, data) {
   return results;
 }
 
-// Function to handle "Proses kontrak ppk" status
+// Function to handle informasi utama and Proses kontrak ppk status
 export async function loginformasiutamappk(page, url) {
   try {
     await page.goto(url);
-    // Add specific scraping logic for "Proses kontrak ppk" here
     console.log(`Processing Proses kontrak ppk at ${url}`);
-    await logInformasiUtamaPemesanPPK(page);
+
+    const scrapedData = await combineOutputs(page);
+    if (scrapedData) {
+      await insertDataiuppk(scrapedData);
+    }
   } catch (error) {
     console.error(`Error processing Proses kontrak ppk: ${error.message}`);
   }
