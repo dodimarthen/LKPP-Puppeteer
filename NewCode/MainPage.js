@@ -23,8 +23,14 @@ export async function logInformasiUtamaPemesanPPK(page) {
       return { informasiUtama, pemesanPPK };
     });
 
-    console.log("Informasi Utama:", data.informasiUtama);
-    console.log("Pemesan & PPK:", data.pemesanPPK);
+    const formatDetails = (details) => {
+      return details
+        .map((detail) => `${detail.heading}: "${detail.description}"`)
+        .join(",\n");
+    };
+
+    console.log("Informasi Utama:\n", formatDetails(data.informasiUtama));
+    console.log("Pemesan & PPK:\n", formatDetails(data.pemesanPPK));
   } catch (error) {
     console.error("Error scraping details:", error);
   }

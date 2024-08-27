@@ -1,5 +1,5 @@
 import { TableNego } from "./HargaNegosiasi.js";
-
+import { logInformasiUtamaPemesanPPK } from "./MainPage.js";
 // Function to log table links
 export async function logTableLinks(page) {
   try {
@@ -19,8 +19,8 @@ export async function logTableLinks(page) {
           if (
             Url_Paket &&
             (Status_Paket === "Proses negosiasi" ||
-              Status_Paket === "Proses kontrak ppk" ||
-              Status_Paket === "Mengirimkan ke ppk")
+              Status_Paket === "Mengirimkan ke ppk" ||
+              Status_Paket === "Proses kontrak ppk")
           ) {
             return { Url_Paket, Status_Paket, ID_Paket };
           }
@@ -28,10 +28,6 @@ export async function logTableLinks(page) {
         })
         .filter((item) => item !== null);
     });
-
-    // data.forEach((item) => {
-    //   console.log(item.Url_Paket);
-    // });
 
     return data;
   } catch (error) {
@@ -44,12 +40,29 @@ export async function processTableLinks(page, data) {
   const results = [];
 
   for (const item of data) {
-    await page.goto(item.Url_Paket);
-    const tableNegoResult = await TableNego(page);
-    const pairedResult = { ...item, tableNegoResult };
-    results.push(pairedResult);
-    console.log(pairedResult);
+    if (item.Status_Paket === "Proses kontrak ppk") {
+      await loginformasiutamappk(page, item.Url_Paket);
+    } else {
+      // Handle other statuses
+      await page.goto(item.Url_Paket);
+      const tableNegoResult = await TableNego(page);
+      const pairedResult = { ...item, tableNegoResult };
+      results.push(pairedResult);
+      console.log(pairedResult);
+    }
   }
 
   return results;
+}
+
+// Function to handle "Proses kontrak ppk" status
+export async function loginformasiutamappk(page, url) {
+  try {
+    await page.goto(url);
+    // Add specific scraping logic for "Proses kontrak ppk" here
+    console.log(`Processing Proses kontrak ppk at ${url}`);
+    await logInformasiUtamaPemesanPPK(page);
+  } catch (error) {
+    console.error(`Error processing Proses kontrak ppk: ${error.message}`);
+  }
 }
