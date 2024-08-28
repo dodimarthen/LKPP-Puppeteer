@@ -6,6 +6,10 @@ import {
   paketbaruPage,
   user_email_mailer,
   password_email_mailer,
+  receiver_testing_email,
+  receiver_testing_email_2,
+  receiver_testing_email_3,
+  receiver_testing_email_4,
 } from "../config.js";
 import { logTableLinks, processTableLinks } from "./StatusPaket.js";
 import {
@@ -52,7 +56,12 @@ const sendNotificationEmail = async (ID_Paket, newElements) => {
 
   const mailOptions = {
     from: user_email_mailer,
-    to: "dodimartin.sit@gmail.com",
+    to: [
+      receiver_testing_email,
+      receiver_testing_email_2,
+      receiver_testing_email_3,
+      receiver_testing_email_4,
+    ],
     subject: `Paket ${ID_Paket} terdapat perubahan data pada tabel negosiasi`,
     text: `Paket ${ID_Paket} terdapat perubahan data pada tabel negosiasi.\n\nLast Element:\n${newElementsText}`,
   };
