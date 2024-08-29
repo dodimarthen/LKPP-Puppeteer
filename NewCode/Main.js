@@ -172,7 +172,7 @@ const scrapAll = async () => {
   }
 };
 
-cron.schedule("0 * * * *", async () => {
+cron.schedule("0 */3 * * *", async () => {
   console.log("Running scheduled task");
   try {
     await scrapAll();
